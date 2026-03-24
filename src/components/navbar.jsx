@@ -1,37 +1,25 @@
 import React from "react"
+import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
+import { Menu, ChevronDown, ChevronRight, X } from "lucide-react"
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
+  SheetClose,
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-// Resmi dokümantasyondaki yapıyı Vite/React uyumlu hale getirdiğimiz ListItem
-function ListItem({ title, children, href, className, ...props }) {
+// Saf Tailwind için Sadeleştirilmiş Menü Öğesi
+function ListItem({ title, children, href }) {
   return (
     <li>
-      <NavigationMenuLink asChild>
-        <a
-          href={href}
-          className={`block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-stone-100 focus:bg-stone-100 ${className || ""}`}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none text-stone-900">{title}</div>
-          <div className="line-clamp-2 text-sm text-stone-500 mt-1">{children}</div>
-        </a>
-      </NavigationMenuLink>
+      <a
+        href={href}
+        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-stone-100 focus:bg-stone-100"
+      >
+        <div className="text-sm font-medium leading-none text-stone-900">{title}</div>
+        <div className="line-clamp-2 text-sm text-stone-500 mt-1">{children}</div>
+      </a>
     </li>
   )
 }
@@ -42,64 +30,57 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* LOGO */}
-        <div className="font-serif text-2xl font-bold tracking-widest text-emerald-900 cursor-pointer">
+        <Link to="/" className="font-serif text-2xl font-bold tracking-widest text-emerald-900 cursor-pointer">
           ZANAAT
-        </div>
+        </Link>
 
-        {/* MASAÜSTÜ MENÜ (Dokümantasyon Birebir Uyarlaması) */}
-        <div className="hidden md:flex">
-          <NavigationMenu>
-            <NavigationMenuList>
-              
-              {/* KOLEKSİYON */}
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-stone-600 hover:text-emerald-900 font-medium tracking-wide">
-                  Koleksiyon
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-stone-50 border-stone-200">
-                    <ListItem href="#" title="Damla Kehribar">
-                      Usta işi, sertifikalı ve limitli üretim özel seriler.
-                    </ListItem>
-                    <ListItem href="#" title="Oltu Taşı">
-                      Erzurum hakiki oltu tesbih koleksiyonu.
-                    </ListItem>
-                    <ListItem href="#" title="Kuka Ağacı">
-                      İnce işçilikli, kararıkça değerlenen ağaç grubu.
-                    </ListItem>
-                    <ListItem href="#" title="Özel Tasarımlar">
-                      Kişiye özel gümüş ve altın işlemeli modeller.
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+        {/* MASAÜSTÜ MENÜ (Saf CSS / Hatasız Çalışan Versiyon) */}
+        <div className="hidden md:flex items-center space-x-2">
+          
+          {/* KOLEKSİYON */}
+          <div className="relative group px-3 py-6">
+            <button className="flex items-center gap-1 text-sm font-medium tracking-wide text-stone-600 group-hover:text-emerald-900 transition-colors">
+              KOLEKSİYON
+              <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+            </button>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-[500px] bg-white border border-stone-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-[9999] rounded-md pointer-events-none group-hover:pointer-events-auto">
+              <ul className="grid grid-cols-2 gap-3 p-4">
+                <li className="row-span-3 col-span-1">
+                    <div className="flex h-full w-full flex-col justify-end rounded-md bg-stone-100 p-6">
+                    <div className="mb-2 mt-4 text-lg font-serif text-emerald-900">Özel Seriler</div>
+                    <p className="text-sm leading-tight text-stone-500">
+                        Usta işi, sertifikalı ve limitli üretim koleksiyonluk tesbihler.
+                    </p>
+                    </div>
+                </li>
+                <ListItem href="#" title="Kehribar">Damla ve Sıkma özel seriler.</ListItem>
+                <ListItem href="#" title="Oltu Taşı">Erzurum hakiki oltu tesbihler.</ListItem>
+                <ListItem href="#" title="Ağaç Grubu">Kuka ve öd ağacı işlemeler.</ListItem>
+              </ul>
+            </div>
+          </div>
 
-              {/* ATÖLYE */}
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-stone-600 hover:text-emerald-900 font-medium tracking-wide">
-                  Atölye
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 bg-stone-50 border-stone-200">
-                    <ListItem href="#" title="Hikayemiz">
-                      Zanaatın kökleri ve ustalarımız.
-                    </ListItem>
-                    <ListItem href="#" title="Üretim Süreci">
-                      Tezgahımızdan kareler ve videolar.
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+          {/* ATÖLYE */}
+          <div className="relative group px-3 py-6">
+            <button className="flex items-center gap-1 text-sm font-medium tracking-wide text-stone-600 group-hover:text-emerald-900 transition-colors">
+              ATÖLYE
+              <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+            </button>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-[300px] bg-white border border-stone-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-[9999] rounded-md pointer-events-none group-hover:pointer-events-auto">
+              <ul className="flex flex-col gap-2 p-4">
+                <ListItem href="#" title="Hikayemiz">Zanaatın kökleri ve ustalarımız.</ListItem>
+                <ListItem href="#" title="Üretim Süreci">Tezgahımızdan detay kareler.</ListItem>
+              </ul>
+            </div>
+          </div>
 
-              {/* İLETİŞİM (Basit Link) */}
-              <NavigationMenuItem>
-                <NavigationMenuLink href="#" className={`bg-transparent text-stone-600 hover:text-emerald-900 font-medium tracking-wide ${navigationMenuTriggerStyle()}`}>
-                  İletişim
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+          {/* İLETİŞİM */}
+          <div className="px-3 py-6">
+            <Link to="/iletisim" className="flex items-center text-sm font-medium tracking-wide text-stone-600 hover:text-emerald-900 transition-colors">
+              İLETİŞİM
+            </Link>
+          </div>
 
-            </NavigationMenuList>
-          </NavigationMenu>
         </div>
 
         {/* MASAÜSTÜ BUTON */}
@@ -109,23 +90,47 @@ export default function Navbar() {
           </Button>
         </div>
 
-        {/* MOBİL HAMBURGER MENÜ (Sağdan Açılan Sheet) */}
+        {/* MOBİL HAMBURGER MENÜ (Risksiz ama Premium Versiyon) */}
         <div className="md:hidden flex items-center">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-stone-900">
-                <Menu className="h-7 w-7" />
+              <Button variant="ghost" size="icon" className="text-stone-900 hover:bg-stone-200/50">
+                <Menu className="h-8 w-8" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-stone-50 border-l-stone-200">
-              <SheetHeader>
-                <SheetTitle className="font-serif text-2xl text-emerald-900 text-left mt-6">ZANAAT</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col space-y-6 mt-12 text-lg font-medium tracking-wide text-stone-700">
-                <a href="#" className="hover:text-emerald-900 transition-colors border-b border-stone-200 pb-2">Koleksiyon</a>
-                <a href="#" className="hover:text-emerald-900 transition-colors border-b border-stone-200 pb-2">Atölye</a>
-                <a href="#" className="hover:text-emerald-900 transition-colors border-b border-stone-200 pb-2">İletişim</a>
-                <Button className="bg-emerald-900 text-stone-50 hover:bg-emerald-950 rounded-none tracking-widest uppercase text-sm py-6 mt-4">
+            
+            {/* showCloseButton={false} prop'u ile varsayılan kapatıcıyı gizledik. flex flex-col ekledik ki buton en alta yapışsın */}
+            <SheetContent side="right" showCloseButton={false} className="bg-stone-50 border-l-stone-200 flex flex-col p-6 w-[85vw] sm:w-[350px]">
+              
+              {/* Özel ve Büyük Kapatma Düğmesi */}
+              <div className="flex justify-end pt-2 pb-4 border-b border-stone-200/50">
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon" className="text-stone-600 hover:text-emerald-900">
+                    <X className="h-8 w-8" />
+                  </Button>
+                </SheetClose>
+              </div>
+
+              {/* Menü Linkleri (Senin silmek istediğin logo yazısı buraya eklenmedi) */}
+              <div className="flex flex-col mt-6 space-y-2">
+                <a href="#" className="group flex items-center justify-between py-5 text-2xl font-serif tracking-wide text-stone-800 border-b border-stone-200/50 hover:text-emerald-900 transition-colors">
+                  <span>Koleksiyon</span>
+                  {/* Sağa kayan premium ok */}
+                  <ChevronRight className="w-6 h-6 text-stone-400 group-hover:text-emerald-900 group-hover:translate-x-1 transition-transform" />
+                </a>
+                <a href="#" className="group flex items-center justify-between py-5 text-2xl font-serif tracking-wide text-stone-800 border-b border-stone-200/50 hover:text-emerald-900 transition-colors">
+                  <span>Atölye</span>
+                  <ChevronRight className="w-6 h-6 text-stone-400 group-hover:text-emerald-900 group-hover:translate-x-1 transition-transform" />
+                </a>
+                <a href="#" className="group flex items-center justify-between py-5 text-2xl font-serif tracking-wide text-stone-800 border-b border-stone-200/50 hover:text-emerald-900 transition-colors">
+                  <span>İletişim</span>
+                  <ChevronRight className="w-6 h-6 text-stone-400 group-hover:text-emerald-900 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
+              
+              {/* mt-auto sayesinde bu div (ve içindeki buton) en alta itilir */}
+              <div className="mt-auto mb-6">
+                <Button className="w-full bg-emerald-900 text-stone-50 hover:bg-emerald-950 rounded-none tracking-widest uppercase py-7 shadow-md text-sm">
                   Sipariş Ver
                 </Button>
               </div>
