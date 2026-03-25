@@ -4,6 +4,8 @@ import Navbar from './components/Navbar'
 import Home from './components/pages/Home'
 import Contact from './components/pages/Contact'
 import Collection from './components/pages/Collection'
+import ProductDetail from './components/pages/ProductDetail'
+import Atolye from './components/pages/Atolye'
 import Footer from './components/Footer'
 import WhatsAppButton from './components/WhatsAppButton'
 
@@ -18,6 +20,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/iletisim" element={<Contact />} />
             <Route path="/koleksiyon" element={<Collection />} />
+            <Route path="/urun/:id" element={<ProductDetail />} />
+            <Route path="/atolye" element={<Atolye />} />
           </Routes>
         </main>
 

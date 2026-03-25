@@ -1,22 +1,104 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { productsData } from '../../data/products'
 import { Filter, ArrowRight } from 'lucide-react'
 
 export default function Collection() {
-  // Demo amaçlı genişletilmiş ürün listesi
-  const products = [
-    { id: 1, name: "Oltu Taşı Tesbih", desc: "Arpa Kesim | Gümüş Püskül", price: "₺ 3.150", badge: "Hakiki Oltu", img: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=800&auto=format&fit=crop" },
-    { id: 2, name: "Ateş Kehribar", desc: "Küre Kesim | Alpaka Püskül", price: "₺ 2.850", badge: "Yeni", img: "https://images.unsplash.com/photo-1599687351724-dfa3c4ff81b1?q=80&w=800&auto=format&fit=crop" },
-    { id: 3, name: "Kuka Ağacı", desc: "Beyzi Kesim | İnce İşçilik", price: "₺ 1.450", badge: "Kargo Bedava", img: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=800&auto=format&fit=crop" },
-    { id: 4, name: "Damla Kehribar", desc: "Kapsül Kesim | Usta İşi", price: "₺ 6.200", badge: "Sertifikalı", img: "https://images.unsplash.com/photo-1599687351724-dfa3c4ff81b1?q=80&w=800&auto=format&fit=crop" },
-    { id: 5, name: "Sıkma Kehribar", desc: "Şalgam Kesim | Gümüş İşlemeli", price: "₺ 4.100", badge: "Özel Seri", img: "https://images.unsplash.com/photo-1599687351724-dfa3c4ff81b1?q=80&w=800&auto=format&fit=crop" },
-    { id: 6, name: "Zar Kehribar", desc: "Küp Kesim | Sistemli", price: "₺ 5.500", badge: "Sınırlı Stok", img: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=800&auto=format&fit=crop" },
-  ]
+  // --- STATE (DURUM) YÖNETİMİ ---
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState([]); 
+  const [sortOption, setSortOption] = useState("En Yeniler");
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const itemsPerPage = 9; 
+  
+  const categories = ["Damla Kehribar", "Sıkma Kehribar", "Ateş Kehribar", "Oltu Taşı", "Ağaç Grubu"];
+  
+  const priceRanges = [
+    { label: "1.000₺ - 2.500₺", min: 1000, max: 2500 },
+    { label: "2.500₺ - 5.000₺", min: 2500, max: 5000 },
+    { label: "5.000₺ - 10.000₺", min: 5000, max: 10000 },
+    { label: "10.000₺ ve üzeri", min: 10000, max: Infinity }
+  ];
+
+  // --- SEÇİM MANTIĞI ---
+  const handleCategoryChange = (cat) => {
+    setSelectedCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]);
+    setCurrentPage(1); 
+  };
+
+  const handlePriceRangeChange = (label) => {
+    setSelectedPriceRanges(prev => prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedPriceRanges([]); 
+    setSortOption("En Yeniler");
+    setCurrentPage(1);
+  };
+
+  // Filtrelerin aktif olup olmadığını kontrol eden değişken (Buton rengi için)
+  const isFilterActive = selectedCategories.length > 0 || selectedPriceRanges.length > 0 || sortOption !== "En Yeniler";
+
+  const parsePrice = (priceStr) => {
+    if (!priceStr) return 0;
+    return parseInt(priceStr.replace(/[₺.\s]/g, ''), 10);
+  };
+
+  // --- ANA FİLTRELEME VE SIRALAMA ---
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...productsData];
+
+    if (selectedCategories.length > 0) {
+      result = result.filter(product => {
+        const searchString = `${product.name} ${product.specs?.Malzeme || ''}`.toLowerCase();
+        return selectedCategories.some(cat => searchString.includes(cat.toLowerCase()));
+      });
+    }
+
+    if (selectedPriceRanges.length > 0) {
+      result = result.filter(product => {
+        const productPrice = parsePrice(product.price);
+        return selectedPriceRanges.some(selectedLabel => {
+          const range = priceRanges.find(r => r.label === selectedLabel);
+          return productPrice >= range.min && productPrice <= range.max;
+        });
+      });
+    }
+
+    if (sortOption === "Fiyata Göre Artan") {
+      result.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+    } else if (sortOption === "Fiyata Göre Azalan") {
+      result.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+    } else if (sortOption === "En Yeniler") {
+       result.sort((a, b) => {
+          if (a.badge === "Yeni" && b.badge !== "Yeni") return -1;
+          if (a.badge !== "Yeni" && b.badge === "Yeni") return 1;
+          return b.id - a.id;
+       });
+    }
+
+    return result;
+  }, [selectedCategories, selectedPriceRanges, sortOption]);
+
+  // --- SAYFALAMA (PAGINATION) ---
+  const totalItems = filteredAndSortedProducts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentProducts = filteredAndSortedProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  };
 
   return (
     <div className="bg-stone-50 min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Üst Başlık */}
         <div className="mb-12 border-b border-stone-200 pb-8">
           <h1 className="font-serif text-4xl text-stone-900 mb-4 tracking-wide">Tüm Koleksiyon</h1>
           <p className="text-stone-500 font-light max-w-2xl">Usta ellerden çıkan, her biri kendi hikayesine sahip özel tasarım tesbihlerimizi keşfedin.</p>
@@ -24,7 +106,7 @@ export default function Collection() {
 
         <div className="flex flex-col md:flex-row gap-12">
           
-          {/* SOL: FİLTRELEME SÜTUNU (Sidebar) */}
+          {/* SOL: FİLTRELEME SÜTUNU */}
           <aside className="w-full md:w-64 shrink-0">
             <div className="flex items-center gap-2 mb-6 text-stone-900 font-serif text-xl border-b border-stone-200 pb-4">
               <Filter className="w-5 h-5 text-emerald-900" />
@@ -35,9 +117,14 @@ export default function Collection() {
             <div className="mb-8">
               <h3 className="text-sm font-bold text-stone-900 uppercase tracking-widest mb-4">Kategoriler</h3>
               <div className="space-y-3">
-                {["Damla Kehribar", "Sıkma Kehribar", "Ateş Kehribar", "Oltu Taşı", "Ağaç Grubu"].map((cat, i) => (
+                {categories.map((cat, i) => (
                   <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 accent-emerald-900 cursor-pointer" />
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 accent-emerald-900 cursor-pointer" 
+                      checked={selectedCategories.includes(cat)}
+                      onChange={() => handleCategoryChange(cat)}
+                    />
                     <span className="text-sm text-stone-600 group-hover:text-emerald-900 transition-colors">{cat}</span>
                   </label>
                 ))}
@@ -48,63 +135,103 @@ export default function Collection() {
             <div className="mb-8">
               <h3 className="text-sm font-bold text-stone-900 uppercase tracking-widest mb-4">Fiyat Aralığı</h3>
               <div className="space-y-3">
-                {["1.000₺ - 2.500₺", "2.500₺ - 5.000₺", "5.000₺ - 10.000₺", "10.000₺ ve üzeri"].map((price, i) => (
+                {priceRanges.map((range, i) => (
                   <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 accent-emerald-900 cursor-pointer" />
-                    <span className="text-sm text-stone-600 group-hover:text-emerald-900 transition-colors">{price}</span>
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 accent-emerald-900 cursor-pointer"
+                      checked={selectedPriceRanges.includes(range.label)}
+                      onChange={() => handlePriceRangeChange(range.label)}
+                    />
+                    <span className="text-sm text-stone-600 group-hover:text-emerald-900 transition-colors">{range.label}</span>
                   </label>
                 ))}
               </div>
             </div>
             
-            <button className="w-full bg-stone-200 text-stone-700 hover:bg-stone-300 py-3 text-xs tracking-widest uppercase transition-colors">
+            {/* DİNAMİK RENKLİ BUTON */}
+            <button 
+              onClick={clearFilters}
+              className={`w-full py-3 text-xs tracking-widest uppercase transition-all duration-300 ${
+                isFilterActive 
+                  ? 'bg-emerald-900 text-white hover:bg-emerald-950 shadow-md' 
+                  : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+              }`}
+            >
               Filtreleri Temizle
             </button>
           </aside>
 
-          {/* SAĞ: ÜRÜN VİTRİNİ (Grid) */}
+          {/* SAĞ: ÜRÜN VİTRİNİ */}
           <main className="flex-1">
             <div className="flex justify-between items-center mb-6 text-sm text-stone-500">
-              <span>Toplam <b>{products.length}</b> ürün listeleniyor</span>
-              <select className="bg-transparent border-none outline-none text-stone-700 cursor-pointer font-medium">
-                <option>En Yeniler</option>
-                <option>Fiyata Göre Artan</option>
-                <option>Fiyata Göre Azalan</option>
+              <span>Toplam <b>{totalItems}</b> ürün listeleniyor</span>
+              
+              <select 
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="bg-transparent border-none outline-none text-stone-700 cursor-pointer font-medium"
+              >
+                <option value="En Yeniler">En Yeniler</option>
+                <option value="Fiyata Göre Artan">Fiyata Göre Artan</option>
+                <option value="Fiyata Göre Azalan">Fiyata Göre Azalan</option>
               </select>
             </div>
 
-            {/* Ürün Kartları */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((item) => (
-                <div key={item.id} className="group cursor-pointer flex flex-col">
-                  <div className="relative overflow-hidden bg-stone-200 aspect-square mb-4 border border-stone-200/50">
-                    <div className="absolute top-4 left-4 z-10 bg-stone-50 text-stone-900 px-3 py-1 text-xs tracking-widest uppercase shadow-sm">
-                      {item.badge}
-                    </div>
-                    <img 
-                      src={item.img} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                    />
-                  </div>
-                  <div className="flex-1 flex flex-col">
-                    <h3 className="font-serif text-lg text-stone-900 mb-1">{item.name}</h3>
-                    <p className="text-sm text-stone-500 mb-4">{item.desc}</p>
-                    <div className="mt-auto flex justify-between items-center border-t border-stone-200 pt-4">
-                      <span className="font-medium text-stone-900 tracking-wide">{item.price}</span>
-                      <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-emerald-900 transition-colors" />
-                    </div>
-                  </div>
+            {currentProducts.length === 0 ? (
+                <div className="text-center py-20 text-stone-500 font-serif text-xl">
+                    Seçtiğiniz kriterlere uygun ürün bulunamadı.
                 </div>
-              ))}
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {currentProducts.map((item) => (
+                  <Link to={`/urun/${item.id}`} key={item.id} className="group cursor-pointer flex flex-col">
+                    <div className="relative overflow-hidden bg-stone-200 aspect-square mb-4 border border-stone-200/50">
+                      {item.badge && (
+                        <div className="absolute top-4 left-4 z-10 bg-stone-50 text-stone-900 px-3 py-1 text-xs tracking-widest uppercase shadow-sm">
+                          {item.badge}
+                        </div>
+                      )}
+                      <img 
+                        src={item.img} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="font-serif text-lg text-stone-900 mb-1 truncate">{item.name}</h3>
+                      <p className="text-sm text-stone-500 mb-4">{item.desc}</p>
+                      <div className="mt-auto flex justify-between items-center border-t border-stone-200 pt-4">
+                        <span className="font-medium text-stone-900 tracking-wide">{item.price}</span>
+                        <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-emerald-900 transition-colors" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
             
-            {/* Sayfalama (Pagination) Örneği */}
-            <div className="mt-16 flex justify-center items-center gap-2">
-              <button className="w-10 h-10 border border-emerald-900 bg-emerald-900 text-white flex items-center justify-center text-sm">1</button>
-              <button className="w-10 h-10 border border-stone-200 text-stone-600 hover:bg-stone-100 flex items-center justify-center text-sm transition-colors">2</button>
-              <button className="w-10 h-10 border border-stone-200 text-stone-600 hover:bg-stone-100 flex items-center justify-center text-sm transition-colors">3</button>
-            </div>
+            {/* Dinamik Sayfalama */}
+            {totalPages > 1 && (
+              <div className="mt-16 flex justify-center items-center gap-2">
+                {Array.from({ length: totalPages }, (_, index) => {
+                  const pageNum = index + 1;
+                  return (
+                    <button 
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`w-10 h-10 border flex items-center justify-center text-sm transition-colors ${
+                        currentPage === pageNum 
+                          ? 'border-emerald-900 bg-emerald-900 text-white' 
+                          : 'border-stone-200 text-stone-600 hover:bg-stone-100'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </main>
 
         </div>

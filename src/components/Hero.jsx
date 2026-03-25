@@ -13,12 +13,12 @@ export default function Hero() {
     {
       title: "Zanaatın Damlaları",
       desc: "Doğadan süzülen emek ve hikaye. Usta ellerden geleneksel incelikle şekillenen özel koleksiyon.",
-      img: "https://images.unsplash.com/photo-1599687351724-dfa3c4ff81b1?q=80&w=2070&auto=format&fit=crop"
+      img: "../src/images/hero3.png"
     },
     {
       title: "Oltunun Asaleti",
       desc: "Erzurum'un kara elması. Her habbesinde alın teri taşıyan hakiki oltu tesbihler.",
-      img: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=2000&auto=format&fit=crop"
+      img: "../src/images/hero2.jpg"
     }
   ]
 
@@ -32,9 +32,9 @@ export default function Hero() {
       <CarouselContent>
         {slides.map((slide, index) => (
           <CarouselItem key={index}>
-            <section className="relative w-full h-[85vh] flex items-center bg-stone-200 overflow-hidden">
+            <section className="relative w-full h-[80vh] flex items-center bg-stone-200 overflow-hidden">
               <div className="absolute inset-0 w-full h-full">
-                <img src={slide.img} alt="Slider" className="w-full h-full object-cover opacity-30 mix-blend-multiply" />
+                <img src={slide.img} alt="Slider" className="w-full h-full object-cover opacity-70 mix-blend-multiply" />
               </div>
               <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
                 <div className="max-w-2xl">

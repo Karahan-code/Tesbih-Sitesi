@@ -3,7 +3,7 @@ import { MessageCircle, ShoppingBag, MapPin, Phone, Mail, ChevronRight } from 'l
 
 export default function Footer() {
   return (
-    <footer className="relative bg-stone-900 text-stone-400 pt-32 pb-12 [clip-path:polygon(0_0,100%_5vw,100%_100%,0_100%)]">
+    <footer className="relative bg-stone-900 text-stone-400 pt-32 pb-12 border-t border-stone-800">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">
         
         {/* LOGO VE HAKKIMIZDA (Görseldeki gibi sol blok) */}
@@ -45,17 +45,17 @@ export default function Footer() {
         {/* HIZLI BAĞLANTILAR (Görseldeki "Quick Links" kısmı) */}
         <div className="flex flex-col space-y-4 text-sm md:ml-8">
           <h4 className="text-stone-50 tracking-widest uppercase mb-2 font-medium">Bağlantılar</h4>
-          <a href="#" className="hover:text-stone-50 transition-colors flex items-center gap-2 group">
+          <a href="/koleksiyon" className="hover:text-stone-50 transition-colors flex items-center gap-2 group">
             <ChevronRight className="w-4 h-4 text-emerald-900 group-hover:text-emerald-500 transition-colors" />
             Koleksiyon
           </a>
-          <a href="#" className="hover:text-stone-50 transition-colors flex items-center gap-2 group">
+          <a href="/atolye" className="hover:text-stone-50 transition-colors flex items-center gap-2 group">
             <ChevronRight className="w-4 h-4 text-emerald-900 group-hover:text-emerald-500 transition-colors" />
             Atölye
           </a>
-          <a href="#" className="hover:text-stone-50 transition-colors flex items-center gap-2 group">
+          <a href="/iletisim" className="hover:text-stone-50 transition-colors flex items-center gap-2 group">
             <ChevronRight className="w-4 h-4 text-emerald-900 group-hover:text-emerald-500 transition-colors" />
-            Hikayemiz
+            İletişim
           </a>
         </div>
 
